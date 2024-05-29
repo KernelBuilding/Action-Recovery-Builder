@@ -26,9 +26,10 @@ on:
       COMMON_TREE_URL:
         description: 'COMMON_TREE_URL (if no common tree, leave blank)'
         required: false
-      COMMON_PATH:
-        description: 'COMMON_PATH (if no common tree, leave blank)'
+      YOUR_MESSAGE:
+        description: 'YOUR MESSAGE YO SEND'
         required: false
+        default: 'HELLO'
       DEVICE_NAME:
         description: 'DEVICE_NAME'
         required: true
@@ -40,7 +41,7 @@ on:
       BUILD_TARGET:
         description: 'BUILD_TARGET'
         required: true
-        default: 'recovery'
+        default: 'boot'
 
 jobs:
   build:
@@ -154,6 +155,27 @@ jobs:
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+    - name: Upload file to Telegram
+      run: |
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+        export MESSAGE="${{ github.event.inputs.YOUR_MESSAGE }}"
+        
+        if [ "${{ github.event.inputs.BUILD_TARGET }}" == "boot" ]; then
+           export FILES="boot.img"
+        fi
+
+        if [ "${{ github.event.inputs.BUILD_TARGET }}" == "recovery" ]; then
+           export FILES="recovery.img"
+        fi
+
+        if [ "${{ github.event.inputs.BUILD_TARGET }}" == "vendor_boot" ]; then
+           export FILES="vendor_boot.img"
+        fi
+        
+        cd workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+          
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
