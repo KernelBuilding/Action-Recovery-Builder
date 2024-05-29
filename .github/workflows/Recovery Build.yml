@@ -176,6 +176,17 @@ jobs:
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+    - name: Send failure notification
+      if: failure()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.CHAT_ID }}
+        token: ${{ secrets.BOT_TOKEN }}
+        message: |
+          🚧 Build Recovery Failed 🚧
+          Repository: ${{ github.repository }}
+          Commit: ${{ github.sha }}
+      
     - name: Upload file to Telegram
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
