@@ -77,20 +77,20 @@ jobs:
       run: |
         if [[ -z "${{ secrets.CHAT_ID }}" ]]; then
           echo "CHAT_ID not set!"
-          echo "::set-output name=stop::true"
+          echo "stop=true" >> $GITHUB_ENV
         fi
 
         if [[ -z "${{ secrets.BOT_TOKEN }}" ]]; then
           echo "BOT_TOKEN not set!"
-          echo "::set-output name=stop::true"
+          echo "stop=true" >> $GITHUB_ENV
         fi
 
-        if [[ -z "${{ steps.check.outputs.stop }}" ]]; then
-          echo "::set-output name=stop::false"
+        if [[ -z "${{ env.stop }}" ]]; then
+          echo "stop=false" >> $GITHUB_ENV
         fi
 
     - name: Stop if no secrets
-      if: steps.check.outputs.stop == 'true'
+      if: env.stop == 'true'
       run: |
         echo "Stopping execution because secrets are not set."
         exit 1
