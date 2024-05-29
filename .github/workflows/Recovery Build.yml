@@ -42,6 +42,11 @@ on:
         description: 'BUILD_TARGET'
         required: true
         default: 'boot'
+        type: choice
+        options:
+          - "boot"
+          - "recovery"
+          - "vendor_boot"
 
 jobs:
   build:
@@ -161,17 +166,17 @@ jobs:
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         export MESSAGE="${{ github.event.inputs.YOUR_MESSAGE }}"
         
-        if [ "${{ github.event.inputs.BUILD_TARGET }}" == "boot" ]; then
+        case "${{ github.event.inputs.BUILD_TARGET }}" in
+        "boot")
            export FILES="boot.img"
-        fi
-
-        if [ "${{ github.event.inputs.BUILD_TARGET }}" == "recovery" ]; then
+        ;;
+        "recovery")
            export FILES="recovery.img"
-        fi
-
-        if [ "${{ github.event.inputs.BUILD_TARGET }}" == "vendor_boot" ]; then
+        ;;
+        "vendor_boot")
            export FILES="vendor_boot.img"
-        fi
+        ;;
+        esac
         
         cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
