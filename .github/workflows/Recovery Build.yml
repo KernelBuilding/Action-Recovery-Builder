@@ -173,7 +173,7 @@ jobs:
            export FILES="vendor_boot.img"
         fi
         
-        cd workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           
     - name: Upload to Release
