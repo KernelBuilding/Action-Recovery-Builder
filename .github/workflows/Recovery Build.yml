@@ -67,11 +67,34 @@ jobs:
         echo "Makefile Name: ${{ github.event.inputs.MAKEFILE_NAME }}"
         echo "Build Target: ${{ github.event.inputs.BUILD_TARGET }}.img"
         echo "::endgroup::"
- 
+     
     # You might want to Checkout your repo first, but not mandatory
     - name: Check Out
       uses: actions/checkout@v3
-  
+
+    - name: Check secrets
+      id: check
+      run: |
+        if [[ -z "${{ secrets.CHAT_ID }}" ]]; then
+          echo "CHAT_ID not set!"
+          echo "::set-output name=stop::true"
+        fi
+
+        if [[ -z "${{ secrets.BOT_TOKEN }}" ]]; then
+          echo "BOT_TOKEN not set!"
+          echo "::set-output name=stop::true"
+        fi
+
+        if [[ -z "${{ steps.check.outputs.stop }}" ]]; then
+          echo "::set-output name=stop::false"
+        fi
+
+    - name: Stop if no secrets
+      if: steps.check.outputs.stop == 'true'
+      run: |
+        echo "Stopping execution because secrets are not set."
+        exit 1
+
     # Cleanup The Actions Workspace Using Custom Composite Run Actions
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
@@ -115,8 +138,6 @@ jobs:
         mkdir workspace
         cd workspace
         echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
-        git config --global user.name "Nico170420"
-        git config --global user.email "b170420nc@gmail.com"
         repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
       id: pwd
           
