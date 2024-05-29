@@ -76,24 +76,14 @@ jobs:
       id: check
       run: |
         if [[ -z "${{ secrets.CHAT_ID }}" ]]; then
-          echo "CHAT_ID not set!"
-          echo "stop=true" >> $GITHUB_ENV
+          echo "Build Failed, CHAT_ID not set!"
+          exit 1
         fi
 
         if [[ -z "${{ secrets.BOT_TOKEN }}" ]]; then
-          echo "BOT_TOKEN not set!"
-          echo "stop=true" >> $GITHUB_ENV
+          echo "Build Failed, BOT_TOKEN not set!"
+          exit 1
         fi
-
-        if [[ -z "${{ env.stop }}" ]]; then
-          echo "stop=false" >> $GITHUB_ENV
-        fi
-
-    - name: Stop if no secrets
-      if: env.stop == 'true'
-      run: |
-        echo "Stopping execution because secrets are not set."
-        exit 1
 
     # Cleanup The Actions Workspace Using Custom Composite Run Actions
     - name: Cleanup
