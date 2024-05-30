@@ -199,7 +199,7 @@ jobs:
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         
-        if [[ -f "$LOGS" ]]; then
+        if [[ -f "$LOGS" ]] && [[ -s "$LOGS" ]]; then 
           cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
           curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           exit 1
