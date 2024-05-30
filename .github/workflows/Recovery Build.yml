@@ -195,18 +195,18 @@ jobs:
 
     - name: Send Error.log To Telegram
       run: |
-        export LOGS="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/error.log"
-        export CHAT_ID="${{  secrets.CHAT_ID  }}"
-        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+       export LOGS="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/error.log"
+       export CHAT_ID="${{  secrets.CHAT_ID  }}"
+       export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         
-        if [[ -f "$LOGS" ]]; then
-          echo "$LOGS does not exist."
-          exit 1
-        else
-          cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
-          curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"  
-        fi
-        
+       if [[ -f "$LOGS" ]]; then
+         cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
+         curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+         exit 1
+       else
+         echo "$LOGS does not exist, continue build"
+       fi
+  
     - name: Send Output File To Telegram
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
