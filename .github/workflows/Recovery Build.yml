@@ -188,11 +188,12 @@ jobs:
     - name: Failure Telegram Notification
       uses: xinthink/action-telegram@v1.1
       if: failure() 
+      continue-on-error: true
       with:
-        chatId: ${{ secrets.TELEGRAM_TO }}
-        botToken: ${{ secrets.TELEGRAM_TOKEN }}
+        chatId: ${{ secrets.CHAT_ID }}
+        botToken: ${{ secrets.BOT_TOKEN }}
         jobStatus: '🚧 Build Recovery Failed 🚧'
-         
+        
     - name: Upload file to Telegram
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
