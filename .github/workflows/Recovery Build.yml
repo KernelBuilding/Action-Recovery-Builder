@@ -176,23 +176,21 @@ jobs:
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
-    - name: Success Telegram Notification
-      uses: xinthink/action-telegram@v1.1
-      if: success()
-      continue-on-error: true
-      with:
-        chatId: ${{ secrets.CHAT_ID }}
-        botToken: ${{ secrets.BOT_TOKEN }}
-        jobStatus: '✅ Build Recovery Finished ✅'
-        
-    - name: Failure Telegram Notification
-      uses: xinthink/action-telegram@v1.1
-      if: failure() 
-      continue-on-error: true
-      with:
-        chatId: ${{ secrets.CHAT_ID }}
-        botToken: ${{ secrets.BOT_TOKEN }}
-        jobStatus: '🚧 Build Recovery Failed 🚧'
+    - name: Send Message To Telegram 
+      run: |
+        export FILE= "/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img"
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+
+        if [[ -f "$FILE" ]]; then
+          echo "File $FILE exists."
+          export MSG="✅ Build Recovery Finished ✅"
+          curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d text="${MSG}"
+        else 
+          echo "File $FILE does not exist."
+          export MSG2="🚧 Build Recovery Failed 🚧"
+          curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d text="${MSG2}"
+        fi
         
     - name: Upload file to Telegram
       run: |
