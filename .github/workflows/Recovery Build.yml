@@ -49,7 +49,7 @@ on:
           - "vendor_boot"
 
 jobs:
-  build and upload:
+  build_upload:
     if: github.event.repository.owner.id == github.event.sender.id
     runs-on: ubuntu-latest
     permissions:
