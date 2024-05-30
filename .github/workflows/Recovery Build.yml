@@ -178,7 +178,7 @@ jobs:
 
     - name: Send Message To Telegram 
       run: |
-        export FILE= "/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img"
+        export FILE="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img"
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
 
