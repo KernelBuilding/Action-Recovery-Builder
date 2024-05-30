@@ -183,15 +183,15 @@ jobs:
       with:
         chatId: ${{ secrets.CHAT_ID }}
         botToken: ${{ secrets.BOT_TOKEN }}
-        message: '✅ Build Recovery Finished ✅'
+        jobStatus: '✅ Build Recovery Finished ✅'
         
-    - name: Fail Telegram Notification
+    - name: Failure Telegram Notification
       uses: xinthink/action-telegram@v1.1
-      if: failure()
+      if: failure() 
       with:
-        chatId: ${{ secrets.CHAT_ID }}
-        botToken: ${{ secrets.BOT_TOKEN }}
-        message: '🚧 Build Recovery Failed 🚧'
+        chatId: ${{ secrets.TELEGRAM_TO }}
+        botToken: ${{ secrets.TELEGRAM_TOKEN }}
+        jobStatus: '🚧 Build Recovery Failed 🚧'
          
     - name: Upload file to Telegram
       run: |
