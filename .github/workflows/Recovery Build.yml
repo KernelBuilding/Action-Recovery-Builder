@@ -167,15 +167,16 @@ jobs:
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
-        swap-size-gb: 12
-
+        swap-size-gb: 15
+        
     - name: Building recovery
       run: |
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-
+      continue-on-error: true
+      
     - name: Send Message To Telegram 
       run: |
         export FILE="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img"
@@ -190,6 +191,10 @@ jobs:
           echo "File $FILE does not exist."
           export MSG2="🚧 Build Recovery Failed 🚧"
           curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d text="${MSG2}"
+        # Send Error.log To Telegram
+          cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
+          curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+          exit 1
         fi
         
     - name: Send Output File To Telegram
