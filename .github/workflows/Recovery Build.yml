@@ -176,15 +176,23 @@ jobs:
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
-          # Send Build 'start' notification
-    - name: Telegram Failed Notification
+    - name: Success Telegram Notification
       uses: xinthink/action-telegram@v1.1
+      if: success()
+      continue-on-error: true
       with:
         chatId: ${{ secrets.CHAT_ID }}
         botToken: ${{ secrets.BOT_TOKEN }}
-        jobStatus: "🚧 Build Recovery Failed 🚧"
-        skipSuccess: true
-      
+        message: '✅ Build Recovery Finished ✅'
+        
+    - name: Fail Telegram Notification
+      uses: xinthink/action-telegram@v1.1
+      if: failure()
+      with:
+        chatId: ${{ secrets.CHAT_ID }}
+        botToken: ${{ secrets.BOT_TOKEN }}
+        message: '🚧 Build Recovery Failed 🚧'
+         
     - name: Upload file to Telegram
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
