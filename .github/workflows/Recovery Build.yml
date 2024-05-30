@@ -191,10 +191,20 @@ jobs:
           echo "File $FILE does not exist."
           export MSG2="🚧 Build Recovery Failed 🚧"
           curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d text="${MSG2}"
-        # Send Error.log To Telegram
-          cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
-          curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+        fi
+
+    - name: Send Error.log To Telegram
+      run: |
+        export LOGS="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/error.log"
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+        
+        if [[ -f "$LOGS" ]]; then
+          echo "$LOGS does not exist."
           exit 1
+        else
+          cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
+          curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"  
         fi
         
     - name: Send Output File To Telegram
