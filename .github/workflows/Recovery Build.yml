@@ -1,4 +1,4 @@
-name: Recovery Build
+name: Recovery Build Support Up Telegram 
 
 on:
   workflow_dispatch:
@@ -49,7 +49,7 @@ on:
           - "vendor_boot"
 
 jobs:
-  build:
+  build and upload:
     if: github.event.repository.owner.id == github.event.sender.id
     runs-on: ubuntu-latest
     permissions:
@@ -192,7 +192,7 @@ jobs:
           curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d text="${MSG2}"
         fi
         
-    - name: Upload file to Telegram
+    - name: Send Output File To Telegram
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
