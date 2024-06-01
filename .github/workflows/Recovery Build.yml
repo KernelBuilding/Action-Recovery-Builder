@@ -179,7 +179,7 @@ jobs:
       
     - name: Send Message To Telegram 
       run: |
-        export FILE="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img"
+        export FILE="${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img"
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
 
@@ -195,12 +195,12 @@ jobs:
 
     - name: Send Error.log To Telegram
       run: |
-        export LOGS="/home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/error.log"
+        export LOGS="${GITHUB_WORKSPACE}/workspace/out/error.log"
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         
         if [[ -f "$LOGS" ]] && [[ -s "$LOGS" ]]; then 
-          cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out
+          cd ${GITHUB_WORKSPACE}/workspace/out
           curl -F chat_id="$CHAT_ID" -F document=@"error.log" -F caption="⚠️ Build Failed, This Log Build ⚠️" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           exit 1
         else
@@ -225,7 +225,7 @@ jobs:
         ;;
         esac
         
-        cd /home/runner/work/Action-Recovery-Builder/Action-Recovery-Builder/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           
     - name: Upload to Release
