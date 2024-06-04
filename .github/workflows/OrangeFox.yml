@@ -1,4 +1,4 @@
-name: OrangeFox - Build
+name: Recovery All In One
 
 on:
   workflow_dispatch:
