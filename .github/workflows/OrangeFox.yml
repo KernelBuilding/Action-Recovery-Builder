@@ -13,7 +13,6 @@ on:
         - OFOX
         - PBRP
         - SHRP
-        - BUILD_ALL
       MANIFEST_BRANCH:
         description: 'Recovery Manifest Branch'
         required: true
@@ -57,7 +56,7 @@ jobs:
   OrangeFox-Build:
     name: Build OFOX by ${{ github.actor }}
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.RECOVERY_NAME == 'OFOX' || github.event.inputs.RECOVERY_NAME == 'BUILD_ALL' }}
+    if: ${{ github.event.inputs.RECOVERY_NAME == 'OFOX' }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
@@ -157,9 +156,8 @@ jobs:
           
   TWRP_BUILD:
     name: Build TWRP by ${{ github.actor }}
-    if: ${{ github.event.inputs.RECOVERY_NAME == 'TWRP' || github.event.inputs.RECOVERY_NAME == 'BUILD_ALL' }}
+    if: ${{ github.event.inputs.RECOVERY_NAME == 'TWRP' }}
     runs-on: ubuntu-latest
-    needs: [OrangeFox-Build]
     permissions:
       contents: write
     steps:  
@@ -270,9 +268,8 @@ jobs:
 
   SHRP_BUILD:
     name: Build SHRP by ${{ github.actor }}
-    if: ${{ github.event.inputs.RECOVERY_NAME == 'SHRP' || github.event.inputs.RECOVERY_NAME == 'BUILD_ALL' }}
+    if: ${{ github.event.inputs.RECOVERY_NAME == 'SHRP' }}
     runs-on: ubuntu-latest
-    needs: [TWRP_BUILD]
     permissions:
       contents: write
     steps:
