@@ -47,14 +47,14 @@ on:
         - recovery
         - vendor_boot
       SEND_TELEGRAM:
-        description: ' Auto Upload To Telegram'
+        description: 'Upload To Telegram'
         required: false
         default: true
         type: boolean
 
 jobs:
   OrangeFox-Build:
-    name: Build OFR by ${{ github.actor }}
+    name: Build OFOX by ${{ github.actor }}
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.RECOVERY_NAME == 'OFOX' }}
     env:
@@ -155,6 +155,7 @@ jobs:
           Build Date : ${{ env.BUILD_DATE }}
           
   TWRP_BUILD:
+    name: Build TWRP by ${{ github.actor }}
     if: ${{ github.event.inputs.RECOVERY_NAME == 'TWRP' }}
     runs-on: ubuntu-latest
     permissions:
@@ -227,6 +228,10 @@ jobs:
         lunch twrp_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
+    - name: Set Release Properties
+      run: |
+        echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
+        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
       uses: appleboy/telegram-action@master
@@ -241,7 +246,10 @@ jobs:
           </pre> "
         document: |
           ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-
+          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
+          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
+      continue-on-error: true
+      
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
@@ -253,6 +261,122 @@ jobs:
         tag_name: ${{ github.run_id }}
         body: |
           ## TWRP Recovery - Unofficial
+          Devices : ${{ github.event.inputs.DEVICE_NAME }}
+          Build Date : ${{ env.BUILD_DATE }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  SHRP_BUILD:
+    name: Build SHRP by ${{ github.actor }}
+    if: ${{ github.event.inputs.RECOVERY_NAME == 'SHRP' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Check Out
+      uses: actions/checkout@v3
+      
+    - name: Check secrets
+      id: check
+      run: |
+        if [[ -z "${{ secrets.CHAT_ID }}" ]]; then
+          echo "Build Failed, CHAT_ID not set!"
+          exit 1
+        fi
+
+        if [[ -z "${{ secrets.BOT_TOKEN }}" ]]; then
+          echo "Build Failed, BOT_TOKEN not set!"
+          exit 1
+        fi
+
+    - name: Cleanup
+      uses: rokibhasansagar/slimhub_actions@main
+
+    - name: Prepare the environment
+      run: |
+        sudo apt update
+        sudo apt -y upgrade
+        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python3
+
+    - name: Install repo
+      run: |
+        mkdir ~/bin
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+        sudo ln -sf ~/bin/repo /usr/bin/repo
+        
+    - name: Initialize repo
+      run: |
+        mkdir workspace
+        cd workspace
+        echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
+        git config --global user.name "${{ github.actor }}"
+        git config --global user.email "${{ github.actor }}@users.build"
+        repo init --depth=1 -u https://github.com/SHRP-Reborn/manifest.git -b shrp-${{ github.event.inputs.MANIFEST_BRANCH }}
+      id: pwd
+          
+    - name: Repo Sync
+      run: |
+        repo sync -j$(nproc --all) --force-sync
+      working-directory: workspace
+      
+    - name: Clone device tree
+      run: |
+        git clone ${{ github.event.inputs.DEVICE_TREE }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
+    - name: Sync Device Dependencies
+      run: |
+        bash ${GITHUB_WORKSPACE}/scripts/convert.sh ${{ github.event.inputs.DEVICE_PATH }}/${{ steps.buildtree.outputs.value }}.dependencies
+        repo sync -j$(nproc --all)
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+      continue-on-error: true
+
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 15
+
+    - name: Building recovery
+      run: |
+        source build/envsetup.sh
+        export ALLOW_MISSING_DEPENDENCIES=true
+        lunch twrp_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
+    - name: Set Release Properties
+      run: |
+        echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
+        
+    - name: Upload files to Telegram
+      if: github.event.inputs.SEND_TELEGRAM == 'true'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{  secrets.CHAT_ID  }}
+        token: ${{ secrets.BOT_TOKEN }}
+        message: "
+          <pre>
+              <b>SHRP Recovery - Unofficial</b>
+              <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
+              <b>Build Date : ${{ env.BUILD_DATE }}</b>
+          </pre> "
+        document: |
+          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
+          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
+          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
+      continue-on-error: true
+          
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: | 
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
+        name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+        tag_name: ${{ github.run_id }}
+        body: |
+          ## SHRP Recovery - Unofficial
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
       env:
