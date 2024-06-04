@@ -124,23 +124,29 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
-
+        echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip | cut -d ' ' -f 1)" >> $GITHUB_ENV
+       
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{  secrets.CHAT_ID  }}
-        token: ${{ secrets.BOT_TOKEN }}
-        message: "
+      run: |
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+        export MESSAGE="
           <pre>
               <b>OrangeFox Recovery - Unofficial</b>
               <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
+              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
           </pre> "
-        document: |
-          ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.img
-          ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.zip
-     
+        
+        export FILES=("${{ github.event.inputs.BUILD_TARGET }}.img" "*.zip" "vendor_boot.img")
+        
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+      continue-on-error: true
+      
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
@@ -153,6 +159,9 @@ jobs:
           ## OrangeFox Recovery - Unofficial
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
+          ## MD5 Files
+          MD5 IMG    : ${{ env.MD5_IMG }}
+          MD5 ZIP    : ${{ env.MD5_ZIP }}
           
   TWRP_BUILD:
     name: Build TWRP by ${{ github.actor }}
@@ -231,25 +240,26 @@ jobs:
     - name: Set Release Properties
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
+        echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
         
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{  secrets.CHAT_ID  }}
-        token: ${{ secrets.BOT_TOKEN }}
-        message: "
+      run: |
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+        export MESSAGE="
           <pre>
               <b>TWRP Recovery - Unofficial</b>
-              <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
+              <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
+              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
           </pre> "
-        document: |
-          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
-          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
-      continue-on-error: true
-      
+        
+        export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
+        
+        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+                 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
@@ -263,6 +273,8 @@ jobs:
           ## TWRP Recovery - Unofficial
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
+          ## MD5 Files
+          MD5 IMG    : ${{ env.MD5_IMG }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -347,25 +359,29 @@ jobs:
     - name: Set Release Properties
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
-        
+        echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip | cut -d ' ' -f 1)" >> $GITHUB_ENV
+       
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{  secrets.CHAT_ID  }}
-        token: ${{ secrets.BOT_TOKEN }}
-        message: "
+      run: |
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+        export MESSAGE="
           <pre>
               <b>SHRP Recovery - Unofficial</b>
               <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
+              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
           </pre> "
-        document: |
-          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
-          ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
+        
+        export FILES=("${{ github.event.inputs.BUILD_TARGET }}.img" "*.zip" "vendor_boot.img")
+        
+        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
       continue-on-error: true
-          
+      
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
@@ -379,5 +395,8 @@ jobs:
           ## SHRP Recovery - Unofficial
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
+          ## MD5 Files
+          MD5 IMG    : ${{ env.MD5_IMG }}
+          MD5 ZIP    : ${{ env.MD5_ZIP }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
