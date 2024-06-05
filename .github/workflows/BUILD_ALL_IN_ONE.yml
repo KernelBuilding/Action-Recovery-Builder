@@ -125,7 +125,7 @@ jobs:
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED" >> $GITHUB_ENV
         
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -133,13 +133,11 @@ jobs:
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         export MESSAGE="
-          <pre>
               <b>OrangeFox Recovery - Unofficial</b>
               <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
               <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
-              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
-          </pre> "
+              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
         
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
@@ -254,12 +252,10 @@ jobs:
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         export MESSAGE="
-          <pre>
               <b>TWRP Recovery - Unofficial</b>
               <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
-              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
-          </pre> "
+              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>"
 
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
@@ -366,7 +362,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED" >> $GITHUB_ENV
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -374,13 +370,11 @@ jobs:
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         export MESSAGE="
-          <pre>
               <b>PBRP Recovery - Unofficial</b>
               <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
               <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
-              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
-          </pre> "
+              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
           
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
         export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
@@ -495,7 +489,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED" >> $GITHUB_ENV
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -503,13 +497,11 @@ jobs:
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
         export MESSAGE="
-          <pre>
               <b>SHRP Recovery - Unofficial</b>
               <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
               <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
-              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
-          </pre> "
+              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
           
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
         export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
