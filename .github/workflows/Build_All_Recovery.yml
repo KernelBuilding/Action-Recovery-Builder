@@ -1,4 +1,4 @@
-name: Recovery All In One
+name: Build All Recovery (On Click)
 
 on:
   workflow_dispatch:
