@@ -1,4 +1,4 @@
-name: Build All Recovery (On Click)
+name: Recovery All In One
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       RECOVERY_NAME:
         description: 'Select Recovery To Build'
         required: true
-        default: 'OFOX'
+        default: 'BUILD_ALL'
         type: choice
         options:
         - BUILD_ALL
@@ -86,8 +86,8 @@ jobs:
     - name: Build Environment
       run: |
         sudo apt install aria2 -y
-        git clone https://gitlab.com/OrangeFox/misc/scripts.git -b master
-        cd scripts
+        git clone https://gitlab.com/OrangeFox/misc/scripts.git -b master TOOL
+        cd TOOL
         sudo bash setup/android_build_env.sh
       
     - name: Set-up Manifest
@@ -122,8 +122,8 @@ jobs:
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip | cut -d ' ' -f 1)" >> $GITHUB_ENV
-       
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
+        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
       run: |
@@ -145,7 +145,7 @@ jobs:
         done
         for file in "${FILES[@]}"; do
           if [ -e "$file" ]; then
-            curl -F chat_id="$CHAT_ID" -F document=@"$file" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+            curl -F "chat_id=$CHAT_ID" -F "document=@$file" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           fi
         done
       continue-on-error: true
@@ -261,7 +261,7 @@ jobs:
 
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
-        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+        curl -F "chat_id=$CHAT_ID" -F "document=@$FILES" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
       continue-on-error: true
       
     - name: Upload to Release
@@ -282,11 +282,141 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  PBRP_BUILD:
+    name: Build PBRP by ${{ github.actor }}
+    if: ${{ github.event.inputs.RECOVERY_NAME == 'BUILD_ALL' }}
+    runs-on: ubuntu-latest
+    needs: [TWRP_BUILD]
+    permissions:
+      contents: write
+    steps:
+    - name: Check Out
+      uses: actions/checkout@v3
+      
+    - name: Check secrets
+      id: check
+      run: |
+        if [[ -z "${{ secrets.CHAT_ID }}" ]]; then
+          echo "Build Failed, CHAT_ID not set!"
+          exit 1
+        fi
+
+        if [[ -z "${{ secrets.BOT_TOKEN }}" ]]; then
+          echo "Build Failed, BOT_TOKEN not set!"
+          exit 1
+        fi
+
+    - name: Cleanup
+      uses: rokibhasansagar/slimhub_actions@main
+
+    - name: Prepare the environment
+      run: |
+        sudo apt update
+        sudo apt -y upgrade
+        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python3
+        
+    - name: Install repo
+      run: |
+        mkdir ~/bin
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+        sudo ln -sf ~/bin/repo /usr/bin/repo
+        
+    - name: Initialize repo
+      run: |
+        mkdir workspace
+        cd workspace
+        echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
+        git config --global user.name "${{ github.actor }}"
+        git config --global user.email "${{ github.actor }}@users.build"
+        repo init --depth=1 -u https://github.com/PitchBlackRecoveryProject/manifest_pb.git -b android-${{ github.event.inputs.MANIFEST_BRANCH }}
+      id: pwd
+          
+    - name: Repo Sync
+      run: |
+        repo sync -j$(nproc --all) --force-sync
+      working-directory: workspace
+      
+    - name: Clone device tree
+      run: |
+        git clone ${{ github.event.inputs.DEVICE_TREE }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
+    - name: Sync Device Dependencies
+      run: |
+        bash ${GITHUB_WORKSPACE}/scripts/convert.sh ${{ github.event.inputs.DEVICE_PATH }}/${{ steps.buildtree.outputs.value }}.dependencies
+        repo sync -j$(nproc --all)
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+      continue-on-error: true
+
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 15
+
+    - name: Building recovery
+      run: |
+        source build/envsetup.sh
+        export ALLOW_MISSING_DEPENDENCIES=true
+        lunch twrp_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
+    - name: Set Release Properties
+      run: |
+        echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
+        echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
+       
+    - name: Upload files to Telegram
+      if: github.event.inputs.SEND_TELEGRAM == 'true'
+      run: |
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
+        export MESSAGE="
+          <pre>
+              <b>PBRP Recovery - Unofficial</b>
+              <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
+              <b>Build Date : ${{ env.BUILD_DATE }}</b>
+              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
+          </pre> "
+          
+        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
+        export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
+        for file in *.zip; do
+          FILES+=("$file")
+        done
+        for file in "${FILES[@]}"; do
+          if [ -e "$file" ]; then
+            curl -F "chat_id=$CHAT_ID" -F "document=@$file" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+          fi
+        done
+      continue-on-error: true
+      
+    - name: Upload to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: | 
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
+        name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+        tag_name: ${{ github.run_id }}
+        body: |
+          ## PBRP Recovery - Unofficial
+          Devices : ${{ github.event.inputs.DEVICE_NAME }}
+          Build Date : ${{ env.BUILD_DATE }}
+          ## MD5 Files
+          MD5 IMG    : ${{ env.MD5_IMG }}
+          MD5 ZIP    : ${{ env.MD5_ZIP }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
   SHRP_BUILD:
     name: Build SHRP by ${{ github.actor }}
     if: ${{ github.event.inputs.RECOVERY_NAME == 'BUILD_ALL' }}
     runs-on: ubuntu-latest
-    needs: [TWRP_BUILD]
+    needs: [SHRP_BUILD]
     permissions:
       contents: write
     steps:
@@ -365,7 +495,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -376,38 +506,4 @@ jobs:
           <pre>
               <b>SHRP Recovery - Unofficial</b>
               <b>Devices : ${{ github.event.inputs.DEVICE_NAME }}</b>
-              <b>Build Date : ${{ env.BUILD_DATE }}</b>
-              <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
-              <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
-          </pre> "
-          
-        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
-        export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
-        for file in *.zip; do
-          FILES+=("$file")
-        done
-        for file in "${FILES[@]}"; do
-          if [ -e "$file" ]; then
-            curl -F chat_id="$CHAT_ID" -F document=@"$file" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
-          fi
-        done
-      continue-on-error: true
-      
-    - name: Upload to Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: | 
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip
-          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*vendor*.img
-        name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
-        tag_name: ${{ github.run_id }}
-        body: |
-          ## SHRP Recovery - Unofficial
-          Devices : ${{ github.event.inputs.DEVICE_NAME }}
-          Build Date : ${{ env.BUILD_DATE }}
-          ## MD5 Files
-          MD5 IMG    : ${{ env.MD5_IMG }}
-          MD5 ZIP    : ${{ env.MD5_ZIP }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              <b>Build Date : ${{ env.BUILD_DATE }}
