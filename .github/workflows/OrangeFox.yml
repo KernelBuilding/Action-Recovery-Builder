@@ -141,13 +141,15 @@ jobs:
               <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
           </pre> "
         
-        export FILES=("${{ github.event.inputs.BUILD_TARGET }}.img" "*.zip" "vendor_boot.img")
-        
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
-        
-        for i in ${FILES[@]};
-        do
-          curl -F chat_id="$CHAT_ID" -F document=@"$i" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+        export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
+        for file in *.zip; do
+          FILES+=("$file")
+        done
+        for file in "${FILES[@]}"; do
+          if [ -e "$file" ]; then
+            curl -F chat_id="$CHAT_ID" -F document=@"$file" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+          fi
         done
       continue-on-error: true
       
@@ -258,15 +260,10 @@ jobs:
               <b>Build Date : ${{ env.BUILD_DATE }}</b>
               <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
           </pre> "
-        
-        export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
-        
+
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
-        
-        for i in ${FILES[@]};
-        do
-          curl -F chat_id="$CHAT_ID" -F document=@"$i" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
-        done
+        export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
+        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
       continue-on-error: true
       
     - name: Upload to Release
@@ -384,14 +381,16 @@ jobs:
               <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
               <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>
           </pre> "
-        
-        export FILES=("${{ github.event.inputs.BUILD_TARGET }}.img" "*.zip" "vendor_boot.img")
-        
-        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
-
-        for i in ${FILES[@]};
-        do
-          curl -F chat_id="$CHAT_ID" -F document=@"$i" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+          
+        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
+        export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
+        for file in *.zip; do
+          FILES+=("$file")
+        done
+        for file in "${FILES[@]}"; do
+          if [ -e "$file" ]; then
+            curl -F chat_id="$CHAT_ID" -F document=@"$file" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+          fi
         done
       continue-on-error: true
       
