@@ -125,8 +125,8 @@ jobs:
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip | cut -d ' ' -f 1)" >> $GITHUB_ENV
-       
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
+        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
       run: |
@@ -148,7 +148,7 @@ jobs:
         done
         for file in "${FILES[@]}"; do
           if [ -e "$file" ]; then
-            curl -F chat_id="$CHAT_ID" -F document=@"$file" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+            curl -F "chat_id=$CHAT_ID" -F "document=@$file" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           fi
         done
       continue-on-error: true
@@ -263,7 +263,7 @@ jobs:
 
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
-        curl -F chat_id="$CHAT_ID" -F document=@"$FILES" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+        curl -F "chat_id=$CHAT_ID" -F "document=@$FILES" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
       continue-on-error: true
       
     - name: Upload to Release
@@ -366,7 +366,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/*.zip | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED"
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -389,7 +389,7 @@ jobs:
         done
         for file in "${FILES[@]}"; do
           if [ -e "$file" ]; then
-            curl -F chat_id="$CHAT_ID" -F document=@"$file" -F caption="$MESSAGE" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
+            curl -F "chat_id=$CHAT_ID" -F "document=@$file" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
           fi
         done
       continue-on-error: true
