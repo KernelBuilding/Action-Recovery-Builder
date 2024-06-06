@@ -37,6 +37,10 @@ on:
         description: 'Specify your Device Codename'
         required: true
         default: 'nashc'
+      MAINTAINER:
+        description: 'Build By (your name)'
+        required: true
+        default: 'PGYT PROJECT'
       BUILD_TARGET:
         description: 'Specify your Build Target'
         required: true
@@ -125,15 +129,22 @@ jobs:
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox* | cut -d ' ' -f 1)" >> $GITHUB_ENV
         
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
-        export MESSAGE="<b>OrangeFox Recovery - Unofficial</b>\n<b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>\n<b>Build Date : ${{ env.BUILD_DATE }}</b>\n<b>MD5 IMG    : ${{ env.MD5_IMG }}</b>\n<b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
-        
+        export MESSAGE="<pre>
+        <b>OrangeFox Recovery - Unofficial</b>
+          <b>Build By   : ${{ github.event.inputs.MAINTAINER }}</b>
+          <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
+          <b>Build Date : ${{ env.BUILD_DATE }}</b>
+        <b>MD5 Files Here</b>
+          <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+          <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b></pre>"
+          
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
         for file in *.zip; do
@@ -156,6 +167,7 @@ jobs:
         tag_name: ${{ github.run_id }}
         body: |
           ## OrangeFox Recovery - Unofficial
+          Build By   : ${{ github.event.inputs.MAINTAINER }}
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
           ## MD5 Files
@@ -246,8 +258,14 @@ jobs:
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
-        export MESSAGE="<b>TWRP Recovery - Unofficial</b>\n<b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>\n<b>Build Date : ${{ env.BUILD_DATE }}</b>\n<b>MD5 IMG    : ${{ env.MD5_IMG }}</b>"
-
+        export MESSAGE="<pre>
+        <b>TWRP Recovery - Unofficial</b>
+          <b>Build By   : ${{ github.event.inputs.MAINTAINER }}</b>
+          <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
+          <b>Build Date : ${{ env.BUILD_DATE }}</b>
+        <b>MD5 Files Here</b>
+          <b>MD5 IMG    : ${{ env.MD5_IMG }}</b></pre>"
+          
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
         export FILES="${{ github.event.inputs.BUILD_TARGET }}.img"
         curl -F "chat_id=$CHAT_ID" -F "document=@$FILES" -F "caption=$MESSAGE" -F "parse_mode=HTML" "https://api.telegram.org/bot$BOT_TOKEN/sendDocument"
@@ -264,6 +282,7 @@ jobs:
         tag_name: ${{ github.run_id }}
         body: |
           ## TWRP Recovery - Unofficial
+          Build By   : ${{ github.event.inputs.MAINTAINER }}
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
           ## MD5 Files
@@ -353,14 +372,21 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/PBRP-*" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/PBRP-* | cut -d ' ' -f 1)" >> $GITHUB_ENV
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
-        export MESSAGE="<b>PBRP Recovery - Unofficial</b>\n<b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>\n<b>Build Date : ${{ env.BUILD_DATE }}</b>\n<b>MD5 IMG    : ${{ env.MD5_IMG }}</b>\n<b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
+        export MESSAGE="<pre>
+        <b>PBRP Recovery - Unofficial</b>
+          <b>Build By   : ${{ github.event.inputs.MAINTAINER }}</b>
+          <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
+          <b>Build Date : ${{ env.BUILD_DATE }}</b>
+        <b>MD5 Files Here</b>
+          <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+          <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b></pre>"
           
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
         export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
@@ -385,6 +411,7 @@ jobs:
         tag_name: ${{ github.run_id }}
         body: |
           ## PBRP Recovery - Unofficial
+          Build By   : ${{ github.event.inputs.MAINTAINER }}
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
           ## MD5 Files
@@ -475,14 +502,21 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/SHRP-Reborn_v*" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/SHRP-Reborn_v* | cut -d ' ' -f 1)" >> $GITHUB_ENV
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
-        export MESSAGE="<b>SHRP Recovery - Unofficial</b>\n<b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>\n<b>Build Date : ${{ env.BUILD_DATE }}</b>\n<b>MD5 IMG    : ${{ env.MD5_IMG }}</b>\n<b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
+        export MESSAGE="<pre>
+        <b>SHRP Recovery - Unofficial</b>
+          <b>Build By   : ${{ github.event.inputs.MAINTAINER }}</b>
+          <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
+          <b>Build Date : ${{ env.BUILD_DATE }}</b>
+        <b>MD5 Files Here</b>
+          <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+          <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b></pre>"
           
         cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
         export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
@@ -507,6 +541,7 @@ jobs:
         tag_name: ${{ github.run_id }}
         body: |
           ## SHRP Recovery - Unofficial
+          Build By   : ${{ github.event.inputs.MAINTAINER }}
           Devices : ${{ github.event.inputs.DEVICE_NAME }}
           Build Date : ${{ env.BUILD_DATE }}
           ## MD5 Files
