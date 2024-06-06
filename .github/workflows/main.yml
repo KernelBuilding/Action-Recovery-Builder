@@ -25,12 +25,14 @@ jobs:
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
         MESSAGE="
         <b>PBRP Recovery Build - Unofficial</b>
-          <b>Build By      : PGYT PROJECT</b>
+          <b>Build By      :  PGYT PROJECT</b>
           <b>Devices      : ${{ github.event.inputs.DEVICE_NAME }}</b>
           <b>Build Date  : ${{ env.BUILD_DATE }}</b>
         <b>MD5 Files Here</b>
-          <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
-          <b>MD5 ZIP     : ${{ env.MD5_ZIP }}</b>"
+          <b>MD5 IMG    :  </b>
+            <pre>8jhdhb73783jsnjjuj</pre>
+          <b>MD5 ZIP     : </b>
+            <pre>jsjsjsjjsnshshhe28</pre>"
           
         curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
       continue-on-error: true
