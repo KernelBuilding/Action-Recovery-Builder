@@ -30,14 +30,5 @@ jobs:
         <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
         <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
           
-        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
-        export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
-        for file in *.zip; do
-          FILES+=("$file")
-        done
-        for file in "${FILES[@]}"; do
-          if [ -e "$file" ]; then
-            curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
-          fi
-        done
+        curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
       continue-on-error: true
