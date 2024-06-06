@@ -25,6 +25,6 @@ jobs:
 
     - name: start
       run: |
-        wget -O recovery.img ${{ github.event.inputs.DEVICE_NAME }}
+        wget -O boot.img ${{ github.event.inputs.DEVICE_NAME }}
         pip3 install twrpdtgen
-        python3 -m twrpdtgen recovery.img
+        python3 -m twrpdtgen boot.img
