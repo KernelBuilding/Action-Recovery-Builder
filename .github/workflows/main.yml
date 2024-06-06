@@ -25,6 +25,6 @@ jobs:
 
     - name: start
       run: |
-        wget -O recovery.img $DEVICE_NAME
+        wget -O recovery.img ${{ github.event.inputs.DEVICE_NAME }}
         pip install twrpdtgen --break-system-packages
         python3 -m twrpdtgen
