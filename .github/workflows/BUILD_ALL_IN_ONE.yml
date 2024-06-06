@@ -125,7 +125,7 @@ jobs:
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*" >> $GITHUB_ENV
         
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -353,7 +353,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/PBRP-*" >> $GITHUB_ENV
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
@@ -475,7 +475,7 @@ jobs:
       run: |
         echo "BUILD_DATE=$(TZ=Asia/Jakarta date +%Y%m%d)" >> $GITHUB_ENV
         echo "MD5_IMG=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img | cut -d ' ' -f 1)" >> $GITHUB_ENV
-        echo "MD5_ZIP=MD5 ZIP CHECK NOT SUPPORTED" >> $GITHUB_ENV
+        echo "MD5_ZIP=$(md5sum workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/SHRP-Reborn_v*" >> $GITHUB_ENV
        
     - name: Upload files to Telegram
       if: github.event.inputs.SEND_TELEGRAM == 'true'
