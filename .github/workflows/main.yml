@@ -30,11 +30,11 @@ jobs:
          <b>Build Date : '"${{ env.BUILD_DATE }}"'</b>
         <b>MD5 Files Here</b>
          MD5 IMG : 8jhdhb73783jsnjjuj
-         MD5 ZIP : jsjsjsjjsnshshhe28
+         MD5 ZIP : jsjsjsjjsnshshhe28</pre>
 
         Download  : <a href="https://t.me/@ProjectKernel2">Telegram</a>
         Download2 : <a href="https://t.me/@ProjectKernel2">Mediafire</a> 
-        Download3 : <a href="https://t.me/@ProjectKernel2">Gdrive</a></pre>'
+        Download3 : <a href="https://t.me/@ProjectKernel2">Gdrive</a>'
           
         curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
       continue-on-error: true
