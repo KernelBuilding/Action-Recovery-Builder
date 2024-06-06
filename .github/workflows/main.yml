@@ -23,7 +23,7 @@ jobs:
       run: |
         export CHAT_ID="${{ secrets.CHAT_ID }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
-        MESSAGE='_<i>
+        MESSAGE='
         <b>PBRP Recovery Build - Unofficial</b>
           <b>Build By   :  PGYT PROJECT</b>
           <b>Devices    : '"${{ github.event.inputs.DEVICE_NAME }}"'</b>
@@ -31,7 +31,6 @@ jobs:
         <b>MD5 Files Here</b>
           MD5 IMG : 8jhdhb73783jsnjjuj
           MD5 ZIP : jsjsjsjjsnshshhe28
-        </i>_
      
         Download  : <a href="https://t.me/@ProjectKernel2">Telegram</a> | <a href="https://t.me/@ProjectKernel2">Mediafire</a>'
 
