@@ -20,7 +20,6 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Upload files to Telegram
-      if: github.event.inputs.SEND_TELEGRAM == 'true'
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
