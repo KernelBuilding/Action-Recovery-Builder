@@ -29,10 +29,8 @@ jobs:
           <b>Devices      : ${{ github.event.inputs.DEVICE_NAME }}</b>
           <b>Build Date  : ${{ env.BUILD_DATE }}</b>
         <b>MD5 Files Here</b>
-          <b>MD5 IMG    :  </b>
-            <pre>8jhdhb73783jsnjjuj</pre>
-          <b>MD5 ZIP     : </b>
-            <pre>jsjsjsjjsnshshhe28</pre>"
+          <pre>MD5 IMG    : 8jhdhb73783jsnjjuj /n
+            MD5 ZIP     : jsjsjsjjsnshshhe28</pre>"
           
         curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
       continue-on-error: true
