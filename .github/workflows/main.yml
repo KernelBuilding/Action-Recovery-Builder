@@ -1,0 +1,44 @@
+name: Test Send Message
+
+on: 
+  workflow_dispatch:
+    inputs:
+      DEVICE_NAME:
+        description: 'Enter the device name'
+        required: false
+
+jobs:
+  OrangeFox-Build:
+    name: Build OFOX by ${{ github.actor }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Upload files to Telegram
+      if: github.event.inputs.SEND_TELEGRAM == 'true'
+      run: |
+        export CHAT_ID="${{  secrets.CHAT_ID  }}"
+        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
+        MESSAGE="
+        <b>PBRP Recovery Build - Unofficial</b>
+        <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
+        <b>Build Date : ${{ env.BUILD_DATE }}</b>
+        <b>MD5 IMG    : ${{ env.MD5_IMG }}</b>
+        <b>MD5 ZIP    : ${{ env.MD5_ZIP }}</b>"
+          
+        cd ${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}  
+        export FILES=(${{ github.event.inputs.BUILD_TARGET }}.img)
+        for file in *.zip; do
+          FILES+=("$file")
+        done
+        for file in "${FILES[@]}"; do
+          if [ -e "$file" ]; then
+            curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
+          fi
+        done
+      continue-on-error: true
