@@ -25,7 +25,7 @@ jobs:
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
         MESSAGE="
         <b>PBRP Recovery Build - Unofficial</b>
-          <b>Build By   : PGYT PROJECT
+          <b>Build By   : PGYT PROJECT</b>
           <b>Devices     : ${{ github.event.inputs.DEVICE_NAME }}</b>
           <b>Build Date : ${{ env.BUILD_DATE }}</b>
         <b>MD5 Files</b>
