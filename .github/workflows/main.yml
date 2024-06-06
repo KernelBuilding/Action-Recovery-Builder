@@ -23,14 +23,14 @@ jobs:
       run: |
         export CHAT_ID="${{  secrets.CHAT_ID  }}"
         export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
-        MESSAGE="<pre>
+        MESSAGE="<b><pre>
         <b>PBRP Recovery Build - Unofficial</b>
           <b>Build By   :  PGYT PROJECT</b>
           <b>Devices    : ${{ github.event.inputs.DEVICE_NAME }}</b>
           <b>Build Date : ${{ env.BUILD_DATE }}</b>
         <b>MD5 Files Here</b>
           MD5 IMG : 8jhdhb73783jsnjjuj
-          MD5 ZIP : jsjsjsjjsnshshhe28</pre>"
+          MD5 ZIP : jsjsjsjjsnshshhe28</pre></b>"
           
         curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
       continue-on-error: true
