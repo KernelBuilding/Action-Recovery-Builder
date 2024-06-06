@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       DEVICE_NAME:
-        description: 'Enter the device name'
+        description: 'Enter Your Recovery.img url'
         required: false
 
 jobs:
@@ -21,18 +21,10 @@ jobs:
       
     - name: Upload files to Telegram
       run: |
-        export CHAT_ID="${{ secrets.CHAT_ID }}"
-        export BOT_TOKEN="${{ secrets.BOT_TOKEN }}" 
-        MESSAGE='
-        <b>PBRP Recovery Build - Unofficial</b>
-          <b>Build By   :  PGYT PROJECT</b>
-          <b>Devices    : '"${{ github.event.inputs.DEVICE_NAME }}"'</b>
-          <b>Build Date : '"${{ env.BUILD_DATE }}"'</b>
-        <b>MD5 Files Here</b>
-          MD5 IMG : 8jhdhb73783jsnjjuj
-          MD5 ZIP : jsjsjsjjsnshshhe28
-     
-        Download  : <a href="https://t.me/@ProjectKernel2">Telegram</a> | <a href="https://t.me/@ProjectKernel2">Mediafire</a>'
+        sudo apt update -y && sudo apt install wget pip python3 -y
 
-        curl -s -X POST https://api.telegram.org/bot$BOT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d parse_mode=HTML -d text="${MESSAGE}"
-      continue-on-error: true
+    - name: start
+      run: |
+        wget -O recovery.img $DEVICE_NAME
+        pip install twrpdtgen --break-system-packages
+        python3 -m twrpdtgen
